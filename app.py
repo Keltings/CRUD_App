@@ -60,17 +60,18 @@ def create_todo():
 #defining a handler for the route that listens to a post request
 # that comes in
 #grab the todo id from the route itself
-@app.route('/todos/s<todo_id>et-completed', methods=['POST'])
+@app.route('/todos/<todo_id>/set-completed', methods=['POST'])
 def set_completed_todo(todo_id):
     try:
         completed = request.get_json()['completed']
+        print('completed', completed)
         todo = Todo.query.get(todo_id)
         todo.completed = completed
         db.session.commit()
     except:
         db.session.rollback()
     finally:
-        db.sessionn.close()
+        db.session.close()
     return redirect(url_for('index'))            
 
 
