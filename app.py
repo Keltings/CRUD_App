@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 #start using the db objects
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import sys
 
 
@@ -9,10 +10,12 @@ import sys
 app = Flask(__name__)
 
 #configure the flask app to connectto a database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:#Datascience1@localhost:5432/mine'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:#Datascience1@localhost:5432/mine1'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 #define a db object which links sqlaclemy tou the flsak app
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 #create a class todo item with column id and description
 class Todo(db.Model):
     #specify the name of the table
@@ -20,6 +23,7 @@ class Todo(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False)
 
     # useful debugging statements when printing the objects
     def __repr__(self):
@@ -39,9 +43,11 @@ def create_todo():
         #description = request.form.get('description', '') or
         description = request.get_json()['description'] # fetches the json body that was sent to it
         #create a new todo object
-        todo = Todo(description=description) 
+        todo = Todo(description=description, completed=False) 
         db.session.add(todo)
         db.session.commit()
+        body['id'] = todo.id
+        body['completed'] = todo.completed
         body['description'] = todo.description
 
     except:
@@ -85,7 +91,7 @@ def index():
     # return a template html 
     #modify our dummy data to include data that comes from
     #the database
-    return render_template('index.html', data=Todo.query.all())
+    return render_template('index.html', data=Todo.query.order_by('id').all())
 
 
 
