@@ -81,6 +81,17 @@ def set_completed_todo(todo_id):
     return redirect(url_for('index'))            
 
 
+#deleting when pressing x
+@app.route('/todos/<todo_id>', methods=['DELETE'])
+def delete_todo(todo_id):
+    try:
+        Todo.query.filter_by(id=todo_id).delete()
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    return jsonify({ 'success': True })            
 
 #our goal is to allow a user to visit our homepage and see
 # a list of to dos
