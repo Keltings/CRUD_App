@@ -1,5 +1,5 @@
 #a class that allows us to create an app
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 #start using the db objects
 from flask_sqlalchemy import SQLAlchemy
 
@@ -28,7 +28,19 @@ class Todo(db.Model):
 db.create_all()
 #this ensures the tables are created for all the models
 
+#define a route that listens todos/create and listens to
+#requests that come in with a method post
+@app.route('/todos/create', methods=['POST'])
+def create_todo():
+    description = request.form.get('description', '')
+    #create a new todo object
+    todo = Todo(description=description)
+    db.session.add(todo)
+    db.session.commit()
 
+    #redirect to the index route and reshow the indexpage 
+    return redirect(url_for('index'))
+    # or return render_template('index.html', data=Todo.query.all())
 #our goal is to allow a user to visit our homepage and see
 # a list of to dos
 #set up a rout that listens to our home page
