@@ -1,7 +1,8 @@
 #a class that allows us to create an app
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 #start using the db objects
 from flask_sqlalchemy import SQLAlchemy
+import sys
 
 
 # creates an app that gets named after the name of our file
@@ -32,15 +33,32 @@ db.create_all()
 #requests that come in with a method post
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
-    description = request.form.get('description', '')
-    #create a new todo object
-    todo = Todo(description=description)
-    db.session.add(todo)
-    db.session.commit()
+    body = {}
+    error=False
+    try:
+        #description = request.form.get('description', '') or
+        description = request.get_json()['description'] # fetches the json body that was sent to it
+        #create a new todo object
+        todo = Todo(description=description) 
+        db.session.add(todo)
+        db.session.commit()
+        body['description'] = todo.description
 
-    #redirect to the index route and reshow the indexpage 
-    return redirect(url_for('index'))
-    # or return render_template('index.html', data=Todo.query.all())
+    except:
+        error=True
+        db.session.rollback()
+        print(sys.exc_info())
+
+    finally:
+        db.session.close()
+    if not error:
+        #redirect to the index route and reshow the indexpage 
+        #return redirect(url_for('index'))or
+        return jsonify(body)
+        # or return render_template('index.html', data=Todo.query.all())
+
+
+
 #our goal is to allow a user to visit our homepage and see
 # a list of to dos
 #set up a rout that listens to our home page
