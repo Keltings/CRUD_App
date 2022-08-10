@@ -57,6 +57,22 @@ def create_todo():
         return jsonify(body)
         # or return render_template('index.html', data=Todo.query.all())
 
+#defining a handler for the route that listens to a post request
+# that comes in
+#grab the todo id from the route itself
+@app.route('/todos/s<todo_id>et-completed', methods=['POST'])
+def set_completed_todo(todo_id):
+    try:
+        completed = request.get_json()['completed']
+        todo = Todo.query.get(todo_id)
+        todo.completed = completed
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.sessionn.close()
+    return redirect(url_for('index'))            
+
 
 
 #our goal is to allow a user to visit our homepage and see
