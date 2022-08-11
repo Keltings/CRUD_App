@@ -37,6 +37,9 @@ class TodoList(db.Model):
     name= db.Column(db.String(), nullable=False)
     todos = db.relationship('Todo', backref='list', lazy=True)     
 
+def __repr__(self):
+    return f'<TodoList {self.id} {self.name}>'
+
 #sync our model with te database
 #db.create_all()
 #this ensures the tables are created for all the models
@@ -104,13 +107,23 @@ def delete_todo(todo_id):
 #our goal is to allow a user to visit our homepage and see
 # a list of to dos
 #set up a rout that listens to our home page
-@app.route('/')
+
+"""lists/<list_id means that the user goes to a 
+particular homepage for a particulartodolist"""
+
+@app.route('/lists/<list_id>')
 #call the route handler index
-def index():
+def get_list_todos(list_id):
     # return a template html 
     #modify our dummy data to include data that comes from
     #the database
-    return render_template('index.html', data=Todo.query.order_by('id').all())
+    return render_template('index.html', 
+    data=Todo.query.filter_by(list_id=list_id).order_by('id').all())
+
+#still keep the homage route- redirects to list with list id i 
+@app.route('/')
+def index():
+    return redirect(url_for('get_list_todos', list_id=1))
 
 
 
