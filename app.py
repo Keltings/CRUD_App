@@ -1,4 +1,4 @@
-#a class that allows us to create an app
+# class that allows us to create an app
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 #start using the db objects
 from flask_sqlalchemy import SQLAlchemy
@@ -10,7 +10,7 @@ import sys
 app = Flask(__name__)
 
 #configure the flask app to connectto a database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:#Datascience1@localhost:5432/mine1'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:#Datascience1@localhost:5432/practise'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 #define a db object which links sqlaclemy tou the flsak app
@@ -24,13 +24,21 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(), nullable=False)
     completed = db.Column(db.Boolean, nullable=False)
+    list_id = db.Column(db.Integer, db.ForeignKey('todolists.id'), nullable=False)
 
     # useful debugging statements when printing the objects
     def __repr__(self):
         return f'<Todo {self.id} {self.description}>'
 
+#new model
+class TodoList(db.Model):
+    __tablename__ = 'todolists'
+    id = db.Column(db.Integer, primary_key=True)
+    name= db.Column(db.String(), nullable=False)
+    todos = db.relationship('Todo', backref='list', lazy=True)     
+
 #sync our model with te database
-db.create_all()
+#db.create_all()
 #this ensures the tables are created for all the models
 
 #define a route that listens todos/create and listens to
